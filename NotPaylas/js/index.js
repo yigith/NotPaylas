@@ -1,4 +1,20 @@
-﻿$("#btnKaydet").click(function () {
+﻿var clipboard = new ClipboardJS('.btn');
+
+clipboard.on('success', function (e) {
+    //console.info('Action:', e.action);
+    //console.info('Text:', e.text);
+    //console.info('Trigger:', e.trigger);
+
+    e.clearSelection();
+    $("#btnKopyala").popover("show");
+    $("#btnKopyala").on("shown.bs.popover", function () {
+        setTimeout(function () {
+            $("#btnKopyala").popover("hide");
+        }, 1000);
+    });
+});
+
+$("#btnKaydet").click(function () {
     // https://api.jquery.com/each/
     var notlar = [];
     $("#myTab > li.nav-item:not(.li-yeni-sekme)").each(function (index) {
@@ -18,7 +34,7 @@
         url: "/Notlar/Kaydet",
         data: { veri: data },
         success: function (result) {
-            alert(result);
+            $.notify("Başarıyla kaydedildi.", "success");
         }
     });
 });
@@ -42,7 +58,8 @@ $("#btnYeniSekme").click(function () {
     }
 
     // Yeni Sekmenin Eklenme Kısmı
-    sekmeEkle(sekmeAd);
+    var tabId = sekmeEkle(sekmeAd, "");
+    showTab(tabId);
 });
 
 function sekmeEkle(sekmeAd, icerik = "") {
@@ -56,9 +73,14 @@ function sekmeEkle(sekmeAd, icerik = "") {
     $("#myTabContent").append('<div class="tab-pane fade" id="' + panoId + '" role="tabpanel" aria-labelledby="' + sekmeId + '"><textarea></textarea></div>');
 
     // $("#pano-1 textarea").val(icerik);
-    $("#" + panoId + " textarea").val(icerik);
+    if(icerik != "")
+        $("#" + panoId + " textarea").val(icerik);
 
-    $("#" + sekmeId).tab("show");
+    return sekmeId;
+}
+
+function showTab(id) {
+    $("#" + id).tab("show");
 }
 
 $("#myTab").on("click", ".sekmeKapat", function () {
@@ -76,8 +98,13 @@ $.ajax({
     success: function (result) {
         var notlar = JSON.parse(result);
 
+        var tabId = "";
         $.each(notlar, function (index, value) {
-            sekmeEkle(value.baslik, value.icerik);
+            tabId = sekmeEkle(value.baslik, value.icerik);
         });
+
+        showTab(tabId);
+
+        $("#loading").hide();
     }
 });
