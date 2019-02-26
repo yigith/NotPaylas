@@ -14,6 +14,10 @@ clipboard.on('success', function (e) {
     });
 });
 
+$("#btnReload").click(function () {
+    loadNotes();
+});
+
 $("#btnKaydet").click(function () {
     // https://api.jquery.com/each/
     var notlar = [];
@@ -42,7 +46,9 @@ $("#btnKaydet").click(function () {
 
 
 var yeniSayfaNo = 0;
-$("#btnYeniSekme").click(function () {
+$("#btnYeniSekme").click(function (event) {
+    event.preventDefault();
+
     // Sayfa Başlığına Karar Verilme Kısmı
     var sekmeAd = prompt("Sayfa başlığı:");
 
@@ -62,6 +68,19 @@ $("#btnYeniSekme").click(function () {
     showTab(tabId);
 });
 
+function focusTabPane(tabId) {
+    var panoId = tabId.replace("tab-", "pano-");
+    var textarea = $("#" + panoId + " textarea");
+    textarea.focus();
+    textarea.scrollTop(0);
+    textarea.get(0).setSelectionRange(0, 0);
+}
+
+function removeAllTabs() {
+    $("#myTab > li.nav-item:not(.li-yeni-sekme)").remove();
+    $("div.tab-pane").remove();
+}
+
 function sekmeEkle(sekmeAd, icerik = "") {
     var sekmeSayisi = $("#myTab > li.nav-item:not(.li-yeni-sekme)").length;
     var sekmeId = "tab-" + (sekmeSayisi + 1);
@@ -73,7 +92,7 @@ function sekmeEkle(sekmeAd, icerik = "") {
     $("#myTabContent").append('<div class="tab-pane fade" id="' + panoId + '" role="tabpanel" aria-labelledby="' + sekmeId + '"><textarea></textarea></div>');
 
     // $("#pano-1 textarea").val(icerik);
-    if(icerik != "")
+    if (icerik != "")
         $("#" + panoId + " textarea").val(icerik);
 
     return sekmeId;
@@ -81,6 +100,29 @@ function sekmeEkle(sekmeAd, icerik = "") {
 
 function showTab(id) {
     $("#" + id).tab("show");
+}
+
+function loadNotes() {
+    $("#loading").show();
+    removeAllTabs();
+
+    $.ajax({
+        type: "GET",
+        url: "/Notlar/Getir",
+        success: function (result) {
+            var notlar = JSON.parse(result);
+
+            var tabId = "";
+            $.each(notlar, function (index, value) {
+                tabId = sekmeEkle(value.baslik, value.icerik);
+            });
+
+            if (tabId != "")
+                showTab(tabId);
+
+            $("#loading").hide();
+        }
+    });
 }
 
 $("#myTab").on("click", ".sekmeKapat", function () {
@@ -92,19 +134,10 @@ $("#myTab").on("click", ".sekmeKapat", function () {
     $("#myTab a[role='tab']").first().tab("show");
 });
 
-$.ajax({
-    type: "GET",
-    url: "/Notlar/Getir",
-    success: function (result) {
-        var notlar = JSON.parse(result);
 
-        var tabId = "";
-        $.each(notlar, function (index, value) {
-            tabId = sekmeEkle(value.baslik, value.icerik);
-        });
 
-        showTab(tabId);
-
-        $("#loading").hide();
-    }
+$("#myTab").on('shown.bs.tab', 'a[data-toggle="tab"]', function (e) {
+    focusTabPane(e.target.id);
 });
+
+loadNotes();

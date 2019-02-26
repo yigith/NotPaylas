@@ -15,6 +15,14 @@
 }
 
 .ust {
+    position: relative;
+}
+
+.ust-sag {
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding: 4px 5px;
 }
 
 .orta {
