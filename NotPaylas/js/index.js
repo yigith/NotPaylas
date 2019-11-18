@@ -140,4 +140,8 @@ $("#myTab").on('shown.bs.tab', 'a[data-toggle="tab"]', function (e) {
     focusTabPane(e.target.id);
 });
 
+$("#btnCloseAll").click(function () {
+    removeAllTabs();
+});
+
 loadNotes();
