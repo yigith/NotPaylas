@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using NotPaylas.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -30,6 +32,24 @@ namespace NotPaylas.Controllers
             string veri = System.IO.File.ReadAllText(dosyaYolu);
 
             return Content(veri, "application/json");
+        }
+
+        // siteismi.com/Notlar/NotEkle
+        [HttpPost]
+        [ValidateInput(false)]
+        public ActionResult NotEkle(Sayfa sayfa)
+        {
+            string dosyaYolu =
+    Server.MapPath("~/App_Data/veri.json");
+
+            string veri = System.IO.File.ReadAllText(dosyaYolu);
+            var sayfalar = JsonConvert.DeserializeObject<List<Sayfa>>(veri);
+            sayfalar.Add(sayfa);
+            string json = JsonConvert.SerializeObject(sayfalar);
+
+            System.IO.File.WriteAllText(dosyaYolu, json);
+
+            return Json("başarılı");
         }
     }
 }

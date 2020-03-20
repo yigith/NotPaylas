@@ -109,8 +109,7 @@ function loadNotes() {
     $.ajax({
         type: "GET",
         url: "/Notlar/Getir",
-        success: function (result) {
-            var notlar = JSON.parse(result);
+        success: function (notlar) {
 
             var tabId = "";
             $.each(notlar, function (index, value) {
