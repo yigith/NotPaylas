@@ -29,7 +29,7 @@ namespace NotPaylas.Controllers
 
             string veri = System.IO.File.ReadAllText(dosyaYolu);
 
-            return Json(veri, JsonRequestBehavior.AllowGet);
+            return Content(veri, "application/json");
         }
     }
 }
