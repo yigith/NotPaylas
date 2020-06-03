@@ -10,6 +10,8 @@ namespace NotPaylas.Controllers
 {
     public class NotlarController : Controller
     {
+        public string VeriDosyaYolu => Server.MapPath("~/App_Data/veri.json");
+
         // siteismi.com/Notlar/Kaydet
         [HttpPost]
         [ValidateInput(false)]
@@ -26,10 +28,7 @@ namespace NotPaylas.Controllers
         // siteismi.com/Notlar/Getir
         public ActionResult Getir()
         {
-            string dosyaYolu =
-                Server.MapPath("~/App_Data/veri.json");
-
-            string veri = System.IO.File.ReadAllText(dosyaYolu);
+            string veri = System.IO.File.ReadAllText(VeriDosyaYolu);
 
             return Content(veri, "application/json");
         }
@@ -50,6 +49,12 @@ namespace NotPaylas.Controllers
             System.IO.File.WriteAllText(dosyaYolu, json);
 
             return Json("başarılı");
+        }
+
+        public ActionResult TumunuSil()
+        {
+            System.IO.File.WriteAllText(VeriDosyaYolu, "[]");
+            return Redirect(Url.Content("~/"));
         }
     }
 }

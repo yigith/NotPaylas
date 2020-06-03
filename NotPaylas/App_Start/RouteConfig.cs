@@ -15,6 +15,12 @@ namespace NotPaylas
             routes.IgnoreRoute("");
 
             routes.MapRoute(
+                name: "ResetNotes",
+                url: "reset",
+                defaults: new { controller = "Notlar", action = "TumunuSil" }
+            );
+
+            routes.MapRoute(
                 name: "Default",
                 url: "{controller}/{action}/{id}",
                 defaults: new { controller = "Home", action = "Index", id = UrlParameter.Optional }

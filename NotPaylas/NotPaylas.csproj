@@ -110,6 +110,7 @@
   <ItemGroup>
     <Content Include="Views\web.config" />
     <Content Include="App_Data\veri.json" />
+    <Content Include="Files\KodFunVsExt.vsix" />
     <None Include="packages.config" />
     <None Include="Properties\PublishProfiles\FolderProfile.pubxml" />
     <None Include="Web.Debug.config">
