@@ -38,15 +38,12 @@ namespace NotPaylas.Controllers
         [ValidateInput(false)]
         public ActionResult NotEkle(Sayfa sayfa)
         {
-            string dosyaYolu =
-    Server.MapPath("~/App_Data/veri.json");
-
-            string veri = System.IO.File.ReadAllText(dosyaYolu);
+            string veri = System.IO.File.ReadAllText(VeriDosyaYolu);
             var sayfalar = JsonConvert.DeserializeObject<List<Sayfa>>(veri);
             sayfalar.Add(sayfa);
             string json = JsonConvert.SerializeObject(sayfalar);
 
-            System.IO.File.WriteAllText(dosyaYolu, json);
+            System.IO.File.WriteAllText(VeriDosyaYolu, json);
 
             return Json("başarılı");
         }
