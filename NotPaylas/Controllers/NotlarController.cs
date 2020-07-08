@@ -17,12 +17,22 @@ namespace NotPaylas.Controllers
         [ValidateInput(false)]
         public ActionResult Kaydet(string veri)
         {
+            if (string.IsNullOrEmpty(veri))
+            {
+                return Json("başarılı");
+            }
             string dosyaYolu =
                 Server.MapPath("~/App_Data/veri.json");
 
-            System.IO.File.WriteAllText(dosyaYolu, veri);
-
-            return Json("başarılı");
+            try
+            {
+                System.IO.File.WriteAllText(dosyaYolu, veri);
+                return Json("başarılı");
+            }
+            catch (Exception)
+            {
+                return Json("başarısız");
+            }
         }
 
         // siteismi.com/Notlar/Getir

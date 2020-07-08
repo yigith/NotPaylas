@@ -1,4 +1,5 @@
 ﻿var clipboard = new ClipboardJS('.btn');
+var _saveAll = _.debounce(saveAll, 1000);
 
 clipboard.on('success', function (e) {
     //console.info('Action:', e.action);
@@ -19,31 +20,8 @@ $("#btnReload").click(function () {
 });
 
 $("#btnKaydet").click(function () {
-    // https://api.jquery.com/each/
-    var notlar = [];
-    $("#myTab > li.nav-item:not(.li-yeni-sekme)").each(function (index) {
-        var title = $(this).text().trim();
-        var href = $(this).children(".nav-link").attr("href");
-        var content = $(href + " textarea").val();
-
-        notlar.push({ baslik: title, icerik: content });
-    });
-
-    var data = JSON.stringify(notlar);
-
-    // veriyi /Notlar/Kaydet adresine postalayacağız
-    // bunu yaparken AJAX yöntemini kullanacağız
-    $.ajax({
-        type: "POST",
-        url: "/Notlar/Kaydet",
-        data: { veri: data },
-        success: function (result) {
-            $.notify("Başarıyla kaydedildi.", "success");
-        }
-    });
+    _saveAll();
 });
-
-
 
 var yeniSayfaNo = 0;
 $("#btnYeniSekme").click(function (event) {
@@ -66,7 +44,38 @@ $("#btnYeniSekme").click(function (event) {
     // Yeni Sekmenin Eklenme Kısmı
     var tabId = sekmeEkle(sekmeAd, "");
     showTab(tabId);
+    onNotesChanged();
 });
+
+function saveAll() {
+    // https://api.jquery.com/each/
+    var notlar = [];
+    $("#myTab > li.nav-item:not(.li-yeni-sekme)").each(function (index) {
+        var title = $(this).text().trim();
+        var href = $(this).children(".nav-link").attr("href");
+        var content = $(href + " textarea").val();
+
+        notlar.push({ baslik: title, icerik: content });
+    });
+
+    var data = JSON.stringify(notlar);
+
+    // veriyi /Notlar/Kaydet adresine postalayacağız
+    // bunu yaparken AJAX yöntemini kullanacağız
+    $.ajax({
+        type: "POST",
+        url: "/Notlar/Kaydet",
+        data: { veri: data },
+        success: function (result) {
+            if (result == "başarılı") {
+                toastr.success("Başarıyla kaydedildi.");
+            }
+            else {
+                toastr.error("Kaydederken bir hata oluştu.");
+            }
+        }
+    });
+}
 
 function focusTabPane(tabId) {
     var panoId = tabId.replace("tab-", "pano-");
@@ -124,6 +133,37 @@ function loadNotes() {
     });
 }
 
+function isAutoSave() {
+    return localStorage["autoSave"] === "1";
+}
+
+function updateAutoSaveUI() {
+    if (isAutoSave()) {
+        $("#btnToggleAutoSave > span > i").addClass(["fa-toggle-on", "text-primary"]).removeClass(["fa-toggle-off", "text-secondary"]);
+    }
+    else {
+        $("#btnToggleAutoSave > span > i").addClass(["fa-toggle-off", "text-secondary"]).removeClass(["fa-toggle-on", "text-primary"]);
+    }
+}
+
+function toggleAutoSave() {
+    localStorage["autoSave"] = isAutoSave() ? "0" : "1";
+    updateAutoSaveUI();
+}
+
+function onNotesChanged() {
+    _saveAll();
+}
+
+$("#myTabContent").on("input", "textarea", function (event) {
+    onNotesChanged();
+});
+
+$("#btnToggleAutoSave").click(function (event) {
+    event.preventDefault();
+    toggleAutoSave();
+})
+
 $("#myTab").on("click", ".sekmeKapat", function () {
     var href = $(this).parent().attr("href");
     $(this).closest("li").remove();
@@ -131,6 +171,7 @@ $("#myTab").on("click", ".sekmeKapat", function () {
 
     // sildikten sonra ilk sekmeyi aktif hale getirelim
     $("#myTab a[role='tab']").first().tab("show");
+    onNotesChanged();
 });
 
 
@@ -139,8 +180,11 @@ $("#myTab").on('shown.bs.tab', 'a[data-toggle="tab"]', function (e) {
     focusTabPane(e.target.id);
 });
 
-$("#btnCloseAll").click(function () {
+$("#btnCloseAll").click(function (event) {
+    event.preventDefault();
     removeAllTabs();
+    onNotesChanged();
 });
 
+updateAutoSaveUI();
 loadNotes();

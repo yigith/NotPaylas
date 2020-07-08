@@ -95,7 +95,6 @@
     <Content Include="Global.asax" />
     <Content Include="index.html" />
     <Content Include="js\index.js" />
-    <Content Include="js\notify.min.js" />
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
