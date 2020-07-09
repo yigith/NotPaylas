@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using NotPaylas.Hubs;
 using NotPaylas.Models;
 using System;
 using System.Collections.Generic;
@@ -18,15 +19,23 @@ namespace NotPaylas.Controllers
         public ActionResult Kaydet(string veri)
         {
             if (string.IsNullOrEmpty(veri))
+                return Json("başarısız");
+
+            List<Sayfa> sayfalar;
+            try
             {
-                return Json("başarılı");
+                sayfalar = JsonConvert.DeserializeObject<List<Sayfa>>(veri);
             }
-            string dosyaYolu =
-                Server.MapPath("~/App_Data/veri.json");
+            catch (Exception)
+            {
+                return Json("başarısız");
+            }
 
             try
             {
-                System.IO.File.WriteAllText(dosyaYolu, veri);
+                var json = JsonConvert.SerializeObject(sayfalar);
+                System.IO.File.WriteAllText(VeriDosyaYolu, json);
+                NoteHub.BroadcastPages(json);
                 return Json("başarılı");
             }
             catch (Exception)
